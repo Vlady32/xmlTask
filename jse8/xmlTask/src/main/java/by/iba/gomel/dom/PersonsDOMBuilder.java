@@ -193,6 +193,7 @@ public class PersonsDOMBuilder implements IXMLParserBuilder {
             PersonsDOMBuilder.LOGGER.info(Constants.PHRASE_RECORD_ADDED);
         } catch (final SAXParseException e) {
             PersonsDOMBuilder.LOGGER.error(Constants.SAX_PARSE_EXCEPTION, e);
+            PersonsDOMBuilder.LOGGER.info(Constants.PHRASE_NOT_ADDED_RECORD);
         } catch (final SAXException e) {
             PersonsDOMBuilder.LOGGER.error(Constants.SAX_EXCEPTION, e);
         } catch (final IOException e) {

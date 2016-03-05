@@ -65,6 +65,7 @@ public class Constants {
     public static final String PATH_TO_DTD                     = "DTDPhoneBook.dtd";
     public static final String PHRASE_YES                      = "yes";
     public static final String PHRASE_NOT_FOUND_RECORD         = "Record wasn't found\n";
+    public static final String PHRASE_NOT_ADDED_RECORD         = "Record wasn't added\n";
     public static final String PHRASE_RECORD_ADDED             = "Record was added!\n";
     public static final String PHRASE_RECORD_CHANGED           = "Record was successfully changed!\n";
     public static final String PHRASE_RECORD_DELETED           = "Record was successfully deleted!\n";
