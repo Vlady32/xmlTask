@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE persons SYSTEM "DTDPhoneBook.dtd">
+<persons>
+  <person id="p1">
+    <fullName>Lotish Dmitry</fullName>
+    <address>Bobruisk Batova sreet 18-18</address>
+    <telephone>80445564654</telephone>
+  </person>
+  <person id="p2">
+    <fullName>Klimenkov Andrei</fullName>
+    <address>Gomel Sovetskaya sreet 52-11</address>
+    <telephone>80445653456</telephone>
+  </person>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</persons>

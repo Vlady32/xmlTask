@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE persons SYSTEM "C:\Users\Vlady\git\xmlTask\jse8\xmlTask\src\main\resources\DTDPhoneBook.dtd">
+<persons>
+  <person id="p1">
+    <fullName>Kolotsey Vladislav Vladzimirovich</fullName>
+    <address>Bobruisk Batova sreet 18-18</address>
+    <telephone>80445564654</telephone>
+  </person>
+  <person id="p2">
+    <fullName>Melnikov Konstantin</fullName>
+    <address>Gomel Sovetskaya sreet 52-11</address>
+    <telephone>80445653456</telephone>
+  </person>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</persons>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!ELEMENT persons (person)*>
+<!ELEMENT person (fullName, address+, telephone+)>
+<!ATTLIST person 
+	id ID #REQUIRED
+>
+<!ELEMENT fullName (#PCDATA)>
+<!ELEMENT address (#PCDATA)>
+<!ELEMENT telephone (#PCDATA)>
