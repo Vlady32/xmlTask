@@ -75,11 +75,13 @@ public class Constants {
     public static final String SAX_EXCEPTION                   = "SAXException";
     public static final String SAX_PARSE_EXCEPTION             = "SAXParseException";
     public static final String NUMBER_FORMAT_EXCEPTION         = "NumberFormatException";
+    public static final String FILE_NOT_FOUND_EXCEPTION        = "FileNotFoundException";
     public static final String PHRASE_WRONG_COST               = "Wrong cost\n";
     public static final String IO_EXCEPTION                    = "IOException";
     public static final String ENTER_NUMBER                    = "Please, enter number: ";
     public static final String PATH_TO_DTD                     = "DTDPhoneBook.dtd";
     public static final String PHRASE_YES                      = "yes";
+    public static final String PHRASE_NOT_FOUND_FILE           = "File wasn't found\n";
     public static final String PHRASE_NOT_FOUND_RECORD         = "Record wasn't found\n";
     public static final String PHRASE_NOT_ADDED_RECORD         = "Record wasn't added\n";
     public static final String PHRASE_RECORD_ADDED             = "Record was added!\n";

@@ -1,6 +1,7 @@
 package by.iba.gomel.dom;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -179,7 +180,9 @@ public class PersonsDOMBuilder implements IXMLParser {
     public void connectAnotherXMLFile() {
         final String[] pathToAnotherXMLFile = this.getDataFromConsole(Constants.TYPE_PATH);
         try {
-            this.addDTD(pathToAnotherXMLFile[Constants.PATH_POSITION]);
+            if (!this.addDTD(pathToAnotherXMLFile[Constants.PATH_POSITION])) {
+                return;
+            }
             this.docBuilder.parse(pathToAnotherXMLFile[Constants.PATH_POSITION]);
             this.pathToXMLFile = pathToAnotherXMLFile[Constants.PATH_POSITION];
         } catch (final SAXParseException e) {
@@ -322,7 +325,7 @@ public class PersonsDOMBuilder implements IXMLParser {
      * @param pathToAnotherXMLFile
      *            add dtd to xml file.
      */
-    private void addDTD(final String pathToAnotherXMLFile) {
+    private boolean addDTD(final String pathToAnotherXMLFile) {
         final Path pathDTDFile = Paths.get(this.pathToDTDFile);
         final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         try {
@@ -333,7 +336,7 @@ public class PersonsDOMBuilder implements IXMLParser {
             final Source source = new DOMSource(doc);
             final Result result = new StreamResult(new FileWriter(pathToAnotherXMLFile));
             xformer.transform(source, result);
-
+            return true;
         } catch (final ParserConfigurationException e) {
             PersonsDOMBuilder.LOGGER.error(Constants.PARSER_CONFIG_EXCEPTION, e);
         } catch (final TransformerConfigurationException e) {
@@ -343,9 +346,13 @@ public class PersonsDOMBuilder implements IXMLParser {
         } catch (final SAXException e) {
             PersonsDOMBuilder.LOGGER.info(Constants.PHRASE_ERROR_DTD);
             PersonsDOMBuilder.LOGGER.error(Constants.SAX_EXCEPTION, e);
+        } catch (final FileNotFoundException e) {
+            PersonsDOMBuilder.LOGGER.error(Constants.FILE_NOT_FOUND_EXCEPTION, e);
+            PersonsDOMBuilder.LOGGER.info(Constants.PHRASE_NOT_FOUND_FILE);
         } catch (final IOException e) {
             PersonsDOMBuilder.LOGGER.error(Constants.IO_EXCEPTION, e);
         }
+        return false;
     }
 
     /**

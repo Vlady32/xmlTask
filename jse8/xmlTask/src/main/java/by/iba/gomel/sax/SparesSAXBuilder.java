@@ -89,10 +89,9 @@ public class SparesSAXBuilder implements IXMLParser {
     @Override
     public void connectAnotherXMLFile() {
         final String[] values = this.getDataFromConsole(Constants.TYPE_PATH);
-        if (ValidatorSAXXSD.validate(this.pathToXMLFile, this.pathToXSDFile)) {
+
+        if (ValidatorSAXXSD.validate(values[Constants.PATH_POSITION], this.pathToXSDFile)) {
             this.pathToXMLFile = values[Constants.PATH_POSITION];
-        } else {
-            SparesSAXBuilder.LOGGER.info(Constants.ERROR_XSD);
         }
     }
 
@@ -213,10 +212,10 @@ public class SparesSAXBuilder implements IXMLParser {
 
         if (validation
                 && !ValidatorSAXXSD.validate(src, new StreamSource(Constants.PATH_TO_XSD_FILE))) {
-            SparesSAXBuilder.LOGGER.info(Constants.ERROR_XSD);
             this.reader.setContentHandler(this.saxHandler);
             return;
         }
+
         try {
             TransformerFactory.newInstance().newTransformer().transform(src, res);
         } catch (final TransformerConfigurationException e) {

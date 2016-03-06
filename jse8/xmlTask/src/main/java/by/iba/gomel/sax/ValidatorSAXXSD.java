@@ -1,6 +1,7 @@
 package by.iba.gomel.sax;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javax.xml.XMLConstants;
@@ -48,6 +49,11 @@ public class ValidatorSAXXSD {
             validator.validate(source);
         } catch (final SAXException e) {
             ValidatorSAXXSD.LOGGER.info(Constants.SAX_EXCEPTION, e);
+            ValidatorSAXXSD.LOGGER.info(Constants.ERROR_XSD);
+            return false;
+        } catch (final FileNotFoundException e) {
+            ValidatorSAXXSD.LOGGER.error(Constants.FILE_NOT_FOUND_EXCEPTION, e);
+            ValidatorSAXXSD.LOGGER.info(Constants.PHRASE_NOT_FOUND_FILE);
             return false;
         } catch (final IOException e) {
             ValidatorSAXXSD.LOGGER.info(Constants.IO_EXCEPTION, e);
@@ -74,6 +80,11 @@ public class ValidatorSAXXSD {
             validator.validate(source);
         } catch (final SAXException e) {
             ValidatorSAXXSD.LOGGER.info(Constants.SAX_EXCEPTION, e);
+            ValidatorSAXXSD.LOGGER.info(Constants.ERROR_XSD);
+            return false;
+        } catch (final FileNotFoundException e) {
+            ValidatorSAXXSD.LOGGER.error(Constants.FILE_NOT_FOUND_EXCEPTION, e);
+            ValidatorSAXXSD.LOGGER.error(Constants.PHRASE_NOT_INCLUDE);
             return false;
         } catch (final IOException e) {
             ValidatorSAXXSD.LOGGER.info(Constants.IO_EXCEPTION, e);
