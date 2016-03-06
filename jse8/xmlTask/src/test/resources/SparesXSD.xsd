@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema 
+  xmlns="http://www.w3.org/2001/XMLSchema" 
+  targetNamespace="http://www.example.org/spares" 
+  xmlns:tns="http://www.example.org/spares"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <element name="spares">
+    <complexType>
+      <sequence>
+        <element name="spare" type="tns:Spare" minOccurs="0" maxOccurs="unbounded"/>
+      </sequence>
+    </complexType>
+  </element>
+  <complexType name="Spare">
+    <sequence>
+      <element name="markAuto" type="string"/>
+      <element name="modelAuto" type="string"/>
+      <element name="cost" type="positiveInteger"/>
+    </sequence>
+    <attribute name="key" type="ID" use="required"/>
+  </complexType>
+</schema>

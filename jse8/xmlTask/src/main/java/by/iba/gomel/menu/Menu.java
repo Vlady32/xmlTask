@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 
 import by.iba.gomel.Constants;
 import by.iba.gomel.dom.PersonsDOMBuilder;
-import by.iba.gomel.interfaces.IXMLParserBuilder;
-import by.iba.gomel.sax.PersonsSAXBuilder;
+import by.iba.gomel.interfaces.IXMLParser;
+import by.iba.gomel.sax.SparesSAXBuilder;
 
 /**
  * This class contains methods to working with menu.
@@ -19,8 +19,19 @@ public class Menu {
     private static final Logger LOGGER        = LoggerFactory.getLogger(Menu.class);
     private final Scanner       in            = new Scanner(System.in,
             Charset.defaultCharset().name());
-    private IXMLParserBuilder   builder;
-    private String              pathToXMLFile = Constants.PATH_TO_XML_FILE;
+    private IXMLParser   builder;
+    private String              pathToXMLFile = null;
+    private String              pathToDTDFile = Constants.PATH_TO_DTD_FILE;
+    private String              pathToXSDFile = Constants.PATH_TO_XSD_FILE;
+
+    /**
+     *
+     * @param pathToDTDFile
+     *            set new dtd file.
+     */
+    public void setPathToDTDFile(final String pathToDTDFile) {
+        this.pathToDTDFile = pathToDTDFile;
+    }
 
     /**
      *
@@ -32,6 +43,15 @@ public class Menu {
     }
 
     /**
+     *
+     * @param pathToXSDFile
+     *            set path to xsd file.
+     */
+    public void setPathToXSDFile(final String pathToXSDFile) {
+        this.pathToXSDFile = pathToXSDFile;
+    }
+
+    /**
      * This method shows main menu on the console for choosing parser.
      */
     public void showMenuForChoosingParser() {
@@ -39,12 +59,20 @@ public class Menu {
         Menu.LOGGER.info(Constants.ITEMS_MENU_PARSER);
         choice = Integer.parseInt(this.in.nextLine());
         switch (choice) {
-            case Constants.SAX_PARSER_CHOICE:
-                this.builder = new PersonsSAXBuilder();
+            case Constants.SAX_PARSER_CHOICE: // NOSONAR
+                if (this.pathToXMLFile == null) {
+                    this.setPathToXMLFile(Constants.PATH_TO_XML_FILE_SAX);
+                }
+                this.builder = new SparesSAXBuilder(this.pathToXMLFile, this.pathToXSDFile,
+                        this.in);
                 this.showMenuForWorkingWithXMLFile();
                 break;
-            case Constants.DOM_PARSER_CHOICE:
-                this.builder = new PersonsDOMBuilder(this.pathToXMLFile, this.in);
+            case Constants.DOM_PARSER_CHOICE: // NOSONAR
+                if (this.pathToXMLFile == null) {
+                    this.setPathToXMLFile(Constants.PATH_TO_XML_FILE_DOM);
+                }
+                this.builder = new PersonsDOMBuilder(this.pathToXMLFile, this.pathToDTDFile,
+                        this.in);
                 this.showMenuForWorkingWithXMLFile();
                 break;
             case Constants.MENU_PARSER_EXIT_CHOICE:

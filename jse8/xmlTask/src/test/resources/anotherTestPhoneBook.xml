@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE persons SYSTEM "DTDPhoneBook.dtd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><!DOCTYPE persons SYSTEM "C:\Users\Vlady\git\xmlTask\jse8\xmlTask\src\main\resources\DTDPhoneBook.dtd">
 <persons>
   <person id="p1">
     <fullName>Lotish Dmitry</fullName>

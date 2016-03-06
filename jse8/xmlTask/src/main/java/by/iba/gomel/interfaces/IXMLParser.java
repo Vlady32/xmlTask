@@ -3,7 +3,7 @@ package by.iba.gomel.interfaces;
 /**
  * This interface describes basic methods for working with xml.
  */
-public interface IXMLParserBuilder {
+public interface IXMLParser {
 
     /**
      * Add record in xml file.

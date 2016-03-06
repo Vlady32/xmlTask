@@ -1,9 +1,25 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE persons SYSTEM "DTDPhoneBook.dtd">
+<!DOCTYPE persons SYSTEM "C:\Users\Vlady\git\xmlTask\jse8\xmlTask\src\main\resources\DTDPhoneBook.dtd">
 <persons>
   <person id="p1">
     <fullName>Kolotsey Vladislav Vladzimirovich</fullName>
     <address>Bobruisk Batova sreet 18-18</address>
     <telephone>80445564654</telephone>
   </person>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </persons>

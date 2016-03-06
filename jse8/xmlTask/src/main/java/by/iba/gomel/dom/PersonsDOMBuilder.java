@@ -14,13 +14,14 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,19 +35,20 @@ import org.xml.sax.SAXParseException;
 import by.iba.gomel.Constants;
 import by.iba.gomel.enums.PersonsElements;
 import by.iba.gomel.error.ErrorHandler;
-import by.iba.gomel.interfaces.IXMLParserBuilder;
+import by.iba.gomel.interfaces.IXMLParser;
 import by.iba.gomel.person.Person;
 
 /**
  * This class includes methods to working with DOM parsing.
  */
-public class PersonsDOMBuilder implements IXMLParserBuilder {
+public class PersonsDOMBuilder implements IXMLParser {
 
     private static final Logger  LOGGER = LoggerFactory.getLogger(PersonsDOMBuilder.class);
     private Scanner              in     = new Scanner(System.in, Charset.defaultCharset().name());
     private DocumentBuilder      docBuilder;
     final DocumentBuilderFactory docFactory;
     private String               pathToXMLFile;
+    private final String         pathToDTDFile;
 
     /**
      *
@@ -55,47 +57,19 @@ public class PersonsDOMBuilder implements IXMLParserBuilder {
      * @param pathToXMLFile
      *            path to xml file.
      */
-    public PersonsDOMBuilder(final String pathToXMLFile, final Scanner in) {
+    public PersonsDOMBuilder(final String pathToXMLFile, final String pathToDTDFile,
+            final Scanner in) {
         this.in = in;
         // Create DOM analyzer
         this.docFactory = DocumentBuilderFactory.newInstance();
         this.docFactory.setValidating(true);
         this.pathToXMLFile = pathToXMLFile;
+        this.pathToDTDFile = pathToDTDFile;
         try {
             this.docBuilder = this.docFactory.newDocumentBuilder();
             this.docBuilder.setErrorHandler(new ErrorHandler());
         } catch (final ParserConfigurationException e) {
             PersonsDOMBuilder.LOGGER.error(Constants.PARSER_CONFIG_EXCEPTION, e);
-        }
-    }
-
-    /**
-     *
-     * Add dtd file to file for validating.
-     *
-     * @param pathToAnotherXMLFile
-     *            path to another xml file.
-     */
-    private static void addDTD(final String pathToAnotherXMLFile) {
-        final Path pathToDTDFile = Paths.get(Constants.PATH_TO_DTD_FILE);
-        final StringWriter xmlAsWriter = new StringWriter();
-        FileWriter fw = null;
-        try {
-            final Transformer transformer = TransformerFactory.newInstance().newTransformer();
-            transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM,
-                    pathToDTDFile.toAbsolutePath().toString());
-            transformer.setOutputProperty(OutputKeys.INDENT, Constants.PHRASE_YES);
-            transformer.transform(new StreamSource(pathToAnotherXMLFile),
-                    new StreamResult(xmlAsWriter));
-            fw = new FileWriter(pathToAnotherXMLFile);
-            fw.write(xmlAsWriter.toString());
-            fw.close();
-        } catch (final TransformerConfigurationException e) {
-            PersonsDOMBuilder.LOGGER.error(Constants.TRANSFORMER_CONFIG_EXCEPTION, e);
-        } catch (final TransformerException e) {
-            PersonsDOMBuilder.LOGGER.error(Constants.TRANSFORMER_EXCEPTION, e);
-        } catch (final IOException e) {
-            PersonsDOMBuilder.LOGGER.error(Constants.IO_EXCEPTION, e);
         }
     }
 
@@ -205,7 +179,7 @@ public class PersonsDOMBuilder implements IXMLParserBuilder {
     public void connectAnotherXMLFile() {
         final String[] pathToAnotherXMLFile = this.getDataFromConsole(Constants.TYPE_PATH);
         try {
-            PersonsDOMBuilder.addDTD(pathToAnotherXMLFile[Constants.PATH_POSITION]);
+            this.addDTD(pathToAnotherXMLFile[Constants.PATH_POSITION]);
             this.docBuilder.parse(pathToAnotherXMLFile[Constants.PATH_POSITION]);
             this.pathToXMLFile = pathToAnotherXMLFile[Constants.PATH_POSITION];
         } catch (final SAXParseException e) {
@@ -296,7 +270,7 @@ public class PersonsDOMBuilder implements IXMLParserBuilder {
                     .getElementsByTagName(PersonsElements.PERSON.getNameElement());
             final EnumSet<PersonsElements> elEnumSet = EnumSet.range(PersonsElements.FULL_NAME,
                     PersonsElements.TELEPHONE);
-            final String header = String.format(Constants.FORMAT_HEADER, Constants.HEADER_ID,
+            final String header = String.format(Constants.FORMAT_HEADER_DOM, Constants.HEADER_ID,
                     Constants.HEADER_FULL_NAME, Constants.HEADER_ADDRESS,
                     Constants.HEADER_TELEPHONE);
             PersonsDOMBuilder.LOGGER.info(header);
@@ -327,7 +301,7 @@ public class PersonsDOMBuilder implements IXMLParserBuilder {
             final Element root = doc.getDocumentElement();
             final NodeList personsList = root
                     .getElementsByTagName(PersonsElements.PERSON.getNameElement());
-            final String header = String.format(Constants.FORMAT_HEADER, Constants.HEADER_ID,
+            final String header = String.format(Constants.FORMAT_HEADER_DOM, Constants.HEADER_ID,
                     Constants.HEADER_FULL_NAME, Constants.HEADER_ADDRESS,
                     Constants.HEADER_TELEPHONE);
             PersonsDOMBuilder.LOGGER.info(header);
@@ -343,6 +317,43 @@ public class PersonsDOMBuilder implements IXMLParserBuilder {
 
     }
 
+    /**
+     *
+     * @param pathToAnotherXMLFile
+     *            add dtd to xml file.
+     */
+    private void addDTD(final String pathToAnotherXMLFile) {
+        final Path pathDTDFile = Paths.get(this.pathToDTDFile);
+        final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        try {
+            final Document doc = factory.newDocumentBuilder().parse(pathToAnotherXMLFile);
+            final Transformer xformer = TransformerFactory.newInstance().newTransformer();
+            xformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM,
+                    pathDTDFile.toAbsolutePath().toString());
+            final Source source = new DOMSource(doc);
+            final Result result = new StreamResult(new FileWriter(pathToAnotherXMLFile));
+            xformer.transform(source, result);
+
+        } catch (final ParserConfigurationException e) {
+            PersonsDOMBuilder.LOGGER.error(Constants.PARSER_CONFIG_EXCEPTION, e);
+        } catch (final TransformerConfigurationException e) {
+            PersonsDOMBuilder.LOGGER.error(Constants.TRANSFORMER_CONFIG_EXCEPTION, e);
+        } catch (final TransformerException e) {
+            PersonsDOMBuilder.LOGGER.error(Constants.TRANSFORMER_EXCEPTION, e);
+        } catch (final SAXException e) {
+            PersonsDOMBuilder.LOGGER.info(Constants.PHRASE_ERROR_DTD);
+            PersonsDOMBuilder.LOGGER.error(Constants.SAX_EXCEPTION, e);
+        } catch (final IOException e) {
+            PersonsDOMBuilder.LOGGER.error(Constants.IO_EXCEPTION, e);
+        }
+    }
+
+    /**
+     *
+     * @param type
+     *            type of getting data from console.
+     * @return array of data.
+     */
     private String[] getDataFromConsole(final String type) {
         String[] values;
         switch (type) {
@@ -394,13 +405,13 @@ public class PersonsDOMBuilder implements IXMLParserBuilder {
      *            input Document to writing in xml file.
      */
     private void writeToFile(final Document document) throws SAXParseException {
-        final Path pathToDTDFile = Paths.get(Constants.PATH_TO_DTD_FILE);
+        final Path pathDTDFile = Paths.get(this.pathToDTDFile);
         final StringWriter xmlAsWriter = new StringWriter();
         FileWriter fw = null;
         try {
             final Transformer transformer = TransformerFactory.newInstance().newTransformer();
             transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM,
-                    pathToDTDFile.toAbsolutePath().toString());
+                    pathDTDFile.toAbsolutePath().toString());
             transformer.setOutputProperty(OutputKeys.INDENT, Constants.PHRASE_YES);
             transformer.transform(new DOMSource(document), new StreamResult(xmlAsWriter));
             final ByteArrayInputStream inputStream = new ByteArrayInputStream(
@@ -423,5 +434,4 @@ public class PersonsDOMBuilder implements IXMLParserBuilder {
             PersonsDOMBuilder.LOGGER.error(Constants.IO_EXCEPTION, e);
         }
     }
-
 }

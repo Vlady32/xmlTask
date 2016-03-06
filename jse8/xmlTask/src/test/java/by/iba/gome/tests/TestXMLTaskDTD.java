@@ -8,6 +8,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 
+import by.iba.gomel.Constants;
 import by.iba.gomel.RunnerXMLTask;
 import by.iba.gomel.dom.PersonsDOMBuilder;
 import by.iba.gomel.menu.Menu;
@@ -69,7 +70,7 @@ public class TestXMLTaskDTD {
         System.setIn(in);
         final Scanner testIn = new Scanner(System.in);
         final PersonsDOMBuilder builder = new PersonsDOMBuilder(
-                TestXMLTaskDTD.PATH_TO_TEST_XML_FILE, testIn);
+                TestXMLTaskDTD.PATH_TO_TEST_XML_FILE, Constants.PATH_TO_DTD_FILE, testIn);
         final Person testPerson = new Person();
         testPerson.setId("p3");
         testPerson.setFullName("Sidorov");

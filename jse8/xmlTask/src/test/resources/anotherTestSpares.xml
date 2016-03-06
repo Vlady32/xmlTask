@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?><tns:spares xmlns:tns="http://www.example.org/spares" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.example.org/spares SparesXSD.xsd">
+  <spare key="s1">
+    <markAuto>VAZ</markAuto>
+    <modelAuto>2101</modelAuto>
+    <cost>100000</cost>
+  </spare>
+  <spare key="s2">
+    <markAuto>VW</markAuto>
+    <modelAuto>B3</modelAuto>
+    <cost>123000</cost>
+  </spare>
+</tns:spares>
