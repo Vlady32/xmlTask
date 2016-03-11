@@ -17,7 +17,7 @@ import by.iba.gomel.spare.Spare;
 public class TestXMLTaskSAX {
 
     private static final String PATH_TO_TEST_XML_FILE = "src/test/resources/testSpares.xml";
-    private static final String PATH_TO_TEST_XSD_FILE = "src/test/resources/testSparesXSD.xml";
+    private static final String PATH_TO_TEST_XSD_FILE = "src/test/resources/testSparesXSD.xsd";
 
     @Rule
     public final SystemOutRule  RULE                  = new SystemOutRule().enableLog();

@@ -17,10 +17,12 @@ import by.iba.gomel.Constants;
  */
 public class DeleteFilter extends XMLFilterImpl {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DeleteFilter.class);
-    private Scanner             in     = new Scanner(System.in, Charset.defaultCharset().name());
+    private static final Logger LOGGER        = LoggerFactory.getLogger(DeleteFilter.class);
+    private Scanner             in            = new Scanner(System.in,
+            Charset.defaultCharset().name());
     private boolean             isRightSpare;
     private final String        key;
+    private boolean             isFoundRecord = false;
 
     /**
      *
@@ -48,6 +50,9 @@ public class DeleteFilter extends XMLFilterImpl {
         if (!this.isRightSpare || localName.equals(Constants.ELEMENT_SPARES)) {
             super.endElement(uri, localName, qName);
         }
+        if (localName.equals(Constants.ELEMENT_SPARES) && !this.isFoundRecord) {
+            DeleteFilter.LOGGER.info(Constants.PHRASE_NOT_FOUND_RECORD);
+        }
     }
 
     @Override
@@ -59,11 +64,15 @@ public class DeleteFilter extends XMLFilterImpl {
         }
         if (localName.equals(Constants.ELEMENT_SPARE)
                 && atts.getValue(Constants.ATTRIBUTE_KEY).equals(this.key)) {
+            this.isFoundRecord = true;
             DeleteFilter.LOGGER.info(Constants.PHRASE_CONFIRMATION);
             final String response = this.in.nextLine();
             if (response.equals(Constants.PHRASE_YES)
                     || response.equals(String.valueOf(Constants.ONE))) {
                 this.isRightSpare = true;
+                DeleteFilter.LOGGER.info(Constants.PHRASE_RECORD_DELETED);
+            } else {
+                DeleteFilter.LOGGER.info(Constants.PHRASE_RECORD_NOT_DELETED);
             }
         }
         if (!this.isRightSpare) {

@@ -1,9 +1,9 @@
 package by.iba.gomel.sax;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.nio.charset.Charset;
 import java.util.Scanner;
 
 import javax.xml.transform.Result;
@@ -35,7 +35,7 @@ import by.iba.gomel.spare.Spare;
 public class SparesSAXBuilder implements IXMLParser {
 
     private static final Logger    LOGGER = LoggerFactory.getLogger(SparesSAXBuilder.class);
-    private Scanner                in     = new Scanner(System.in, Charset.defaultCharset().name());
+    private final Scanner          in;
     private final SparesSAXHandler saxHandler;
     private XMLReader              reader;
     private String                 pathToXMLFile;
@@ -69,9 +69,14 @@ public class SparesSAXBuilder implements IXMLParser {
                     values[Constants.MARK_AUTO_POSITION], values[Constants.MODEL_AUTO_POSITION],
                     Integer.parseInt(values[Constants.COST_POSITION]));
             this.writeToFile(xr, this.pathToXMLFile, true);
+            SparesSAXBuilder.LOGGER.info(Constants.PHRASE_RECORD_ADDED);
+        } catch (final SAXException e) {
+            SparesSAXBuilder.LOGGER.info(Constants.ERROR_ADD_EDIT_RECORD);
+            SparesSAXBuilder.LOGGER.error(Constants.SAX_EXCEPTION, e);
+            this.reader.setContentHandler(this.saxHandler);
         } catch (final NumberFormatException e) {
-            SparesSAXBuilder.LOGGER.error(Constants.NUMBER_FORMAT_EXCEPTION, e);
             SparesSAXBuilder.LOGGER.info(Constants.PHRASE_WRONG_COST);
+            SparesSAXBuilder.LOGGER.error(Constants.NUMBER_FORMAT_EXCEPTION, e);
         }
     }
 
@@ -83,15 +88,30 @@ public class SparesSAXBuilder implements IXMLParser {
     public void addRecord(final Spare spare) {
         final XMLReader xr = new AddFilter(this.reader, spare.getId(), spare.getMarkAuto(),
                 spare.getModelAuto(), spare.getCost());
-        this.writeToFile(xr, this.pathToXMLFile, true);
+        try {
+            this.writeToFile(xr, this.pathToXMLFile, false);
+        } catch (final SAXException e) {
+            SparesSAXBuilder.LOGGER.info(Constants.ERROR_ADD_EDIT_RECORD);
+            SparesSAXBuilder.LOGGER.error(Constants.SAX_EXCEPTION, e);
+            this.reader.setContentHandler(this.saxHandler);
+        }
     }
 
     @Override
     public void connectAnotherXMLFile() {
         final String[] values = this.getDataFromConsole(Constants.TYPE_PATH);
-
-        if (ValidatorSAXXSD.validate(values[Constants.PATH_POSITION], this.pathToXSDFile)) {
-            this.pathToXMLFile = values[Constants.PATH_POSITION];
+        try {
+            if (new File(values[Constants.PATH_POSITION]).exists()) {
+                if (ValidatorSAXXSD.validate(values[Constants.PATH_POSITION], this.pathToXSDFile)) {
+                    this.pathToXMLFile = values[Constants.PATH_POSITION];
+                    SparesSAXBuilder.LOGGER.info(Constants.PHRASE_FILE_CONNECTED);
+                }
+            } else {
+                SparesSAXBuilder.LOGGER.info(Constants.PHRASE_FILE_NOT_FOUND);
+            }
+        } catch (final SAXException e) {
+            SparesSAXBuilder.LOGGER.info(Constants.ERROR_XSD);
+            SparesSAXBuilder.LOGGER.error(Constants.SAX_EXCEPTION, e);
         }
     }
 
@@ -99,16 +119,31 @@ public class SparesSAXBuilder implements IXMLParser {
     public void deleteRecord() {
         final String[] values = this.getDataFromConsole(Constants.TYPE_KEY);
         final XMLReader xr = new DeleteFilter(this.reader, values[Constants.KEY_POSITION], this.in);
-        this.writeToFile(xr, this.pathToXMLFile, false);
+        try {
+            this.writeToFile(xr, this.pathToXMLFile, false);
+        } catch (final SAXException e) {
+            SparesSAXBuilder.LOGGER.info(Constants.ERROR_XSD);
+            SparesSAXBuilder.LOGGER.error(Constants.SAX_EXCEPTION, e);
+        }
     }
 
     @Override
     public void editRecord() {
-        final String[] values = this.getDataFromConsole(Constants.TYPE_ALL);
-        final XMLReader xr = new UpdateFilter(this.reader, values[Constants.KEY_POSITION],
-                values[Constants.MARK_AUTO_POSITION], values[Constants.MODEL_AUTO_POSITION],
-                Integer.parseInt(values[Constants.COST_POSITION]));
-        this.writeToFile(xr, this.pathToXMLFile, true);
+        final String[] values = this.getDataFromConsole(Constants.TYPE_KEY);
+        final XMLReader xr = new UpdateFilter(this.reader, values[Constants.KEY_POSITION], this.in);
+        try {
+            this.writeToFile(xr, this.pathToXMLFile, false);
+            if (((UpdateFilter) xr).isFoundRecord()) {
+                SparesSAXBuilder.LOGGER.info(Constants.PHRASE_RECORD_CHANGED);
+
+            }
+        } catch (final SAXException e) {
+            SparesSAXBuilder.LOGGER.info(Constants.ERROR_XSD);
+            SparesSAXBuilder.LOGGER.error(Constants.SAX_EXCEPTION, e);
+        } catch (final NumberFormatException e) {
+            SparesSAXBuilder.LOGGER.info(Constants.PHRASE_WRONG_COST);
+            SparesSAXBuilder.LOGGER.error(Constants.NUMBER_FORMAT_EXCEPTION, e);
+        }
     }
 
     @Override
@@ -125,6 +160,7 @@ public class SparesSAXBuilder implements IXMLParser {
         } catch (final IOException e) {
             SparesSAXBuilder.LOGGER.error(Constants.IO_EXCEPTION, e);
         } catch (final SAXException e) {
+            SparesSAXBuilder.LOGGER.info(Constants.ERROR_XSD);
             SparesSAXBuilder.LOGGER.error(Constants.SAX_EXCEPTION, e);
         }
 
@@ -142,6 +178,7 @@ public class SparesSAXBuilder implements IXMLParser {
         } catch (final IOException e) {
             SparesSAXBuilder.LOGGER.error(Constants.IO_EXCEPTION, e);
         } catch (final SAXException e) {
+            SparesSAXBuilder.LOGGER.info(Constants.ERROR_XSD);
             SparesSAXBuilder.LOGGER.error(Constants.SAX_EXCEPTION, e);
         }
     }
@@ -166,7 +203,7 @@ public class SparesSAXBuilder implements IXMLParser {
                 values[Constants.PATH_POSITION] = this.in.nextLine();
                 break;
             case Constants.TYPE_ALL:
-                values = this.getPersonValuesFromConsole();
+                values = this.getSpareValuesFromConsole();
                 break;
             case Constants.TYPE_SEARCH_INFO:
                 values = new String[Constants.ONE];
@@ -184,7 +221,7 @@ public class SparesSAXBuilder implements IXMLParser {
      *
      * @return array of all values for adding new record.
      */
-    private String[] getPersonValuesFromConsole() {
+    private String[] getSpareValuesFromConsole() {
         final String[] values = new String[Constants.QUANTITY_SPARE_FIELDS];
         SparesSAXBuilder.LOGGER.info(Constants.PHRASE_KEY);
         values[Constants.KEY_POSITION] = this.in.nextLine();
@@ -205,13 +242,12 @@ public class SparesSAXBuilder implements IXMLParser {
      *            file for writing.
      */
     private void writeToFile(final XMLReader xr, final String pathToXMLFile,
-            final boolean validation) {
+            final boolean validation) throws SAXException {
         final StringWriter writtenResult = new StringWriter();
         final Source src = new SAXSource(xr, new InputSource(pathToXMLFile));
         final Result res = new StreamResult(writtenResult);
 
-        if (validation
-                && !ValidatorSAXXSD.validate(src, new StreamSource(Constants.PATH_TO_XSD_FILE))) {
+        if (validation && !ValidatorSAXXSD.validate(src, new StreamSource(this.pathToXSDFile))) {
             this.reader.setContentHandler(this.saxHandler);
             return;
         }
@@ -221,7 +257,12 @@ public class SparesSAXBuilder implements IXMLParser {
         } catch (final TransformerConfigurationException e) {
             SparesSAXBuilder.LOGGER.error(Constants.TRANSFORMER_CONFIG_EXCEPTION, e);
         } catch (final TransformerException e) {
+            this.reader.setContentHandler(this.saxHandler);
+            if (e.getMessage().contains(Constants.NUMBER_FORMAT_EXCEPTION)) {
+                throw new NumberFormatException();
+            }
             SparesSAXBuilder.LOGGER.error(Constants.TRANSFORMER_EXCEPTION, e);
+            return;
         }
         final String result = writtenResult.toString();
         FileWriter write;

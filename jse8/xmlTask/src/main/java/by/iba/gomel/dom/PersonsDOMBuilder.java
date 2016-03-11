@@ -112,8 +112,8 @@ public class PersonsDOMBuilder implements IXMLParser {
 
     @Override
     public void addRecord() {
-        final String[] values = this.getDataFromConsole(Constants.TYPE_ALL);
         try {
+            final String[] values = this.getDataFromConsole(Constants.TYPE_ALL);
             final Document doc = this.docBuilder.parse(this.pathToXMLFile);
             final Element root = doc.getDocumentElement();
             final Element person = doc.createElement(PersonsElements.PERSON.getNameElement());
@@ -132,7 +132,11 @@ public class PersonsDOMBuilder implements IXMLParser {
             root.appendChild(person);
             this.writeToFile(doc);
             PersonsDOMBuilder.LOGGER.info(Constants.PHRASE_RECORD_ADDED);
+        } catch (final NumberFormatException e) {
+            PersonsDOMBuilder.LOGGER.info(Constants.ERROR_TELEPHONE);
+            PersonsDOMBuilder.LOGGER.error(Constants.NUMBER_FORMAT_EXCEPTION, e);
         } catch (final SAXParseException e) {
+            PersonsDOMBuilder.LOGGER.info(Constants.PHRASE_INCORRECT_DATA);
             PersonsDOMBuilder.LOGGER.error(Constants.SAX_PARSE_EXCEPTION, e);
         } catch (final SAXException e) {
             PersonsDOMBuilder.LOGGER.error(Constants.SAX_EXCEPTION, e);
@@ -167,8 +171,8 @@ public class PersonsDOMBuilder implements IXMLParser {
             this.writeToFile(doc);
             PersonsDOMBuilder.LOGGER.info(Constants.PHRASE_RECORD_ADDED);
         } catch (final SAXParseException e) {
-            PersonsDOMBuilder.LOGGER.error(Constants.SAX_PARSE_EXCEPTION, e);
             PersonsDOMBuilder.LOGGER.info(Constants.PHRASE_NOT_ADDED_RECORD);
+            PersonsDOMBuilder.LOGGER.error(Constants.SAX_PARSE_EXCEPTION, e);
         } catch (final SAXException e) {
             PersonsDOMBuilder.LOGGER.error(Constants.SAX_EXCEPTION, e);
         } catch (final IOException e) {
@@ -185,9 +189,10 @@ public class PersonsDOMBuilder implements IXMLParser {
             }
             this.docBuilder.parse(pathToAnotherXMLFile[Constants.PATH_POSITION]);
             this.pathToXMLFile = pathToAnotherXMLFile[Constants.PATH_POSITION];
+            PersonsDOMBuilder.LOGGER.info(Constants.PHRASE_FILE_CONNECTED);
         } catch (final SAXParseException e) {
-            PersonsDOMBuilder.LOGGER.error(Constants.SAX_PARSE_EXCEPTION, e);
             PersonsDOMBuilder.LOGGER.error(Constants.PHRASE_NOT_INCLUDE);
+            PersonsDOMBuilder.LOGGER.error(Constants.SAX_PARSE_EXCEPTION, e);
         } catch (final SAXException e) {
             PersonsDOMBuilder.LOGGER.error(Constants.SAX_EXCEPTION, e);
         } catch (final IOException e) {
@@ -197,6 +202,7 @@ public class PersonsDOMBuilder implements IXMLParser {
 
     @Override
     public void deleteRecord() {
+        boolean isFoundRecord = false;
         final String[] id = this.getDataFromConsole(Constants.TYPE_ID);
         try {
             final Document doc = this.docBuilder.parse(this.pathToXMLFile);
@@ -208,6 +214,7 @@ public class PersonsDOMBuilder implements IXMLParser {
                 final String foundId = ((Element) personElement)
                         .getAttribute(PersonsElements.ID.getNameElement());
                 if (foundId.equals(id[Constants.ID_POSITION_CONSOLE])) {
+                    isFoundRecord = true;
                     PersonsDOMBuilder.LOGGER.info(Constants.PHRASE_CONFIRMATION);
                     final String response = this.in.nextLine();
                     if (response.equals(Constants.PHRASE_YES) // NOSONAR
@@ -217,7 +224,11 @@ public class PersonsDOMBuilder implements IXMLParser {
                     }
                 }
             }
-            this.writeToFile(doc);
+            if (isFoundRecord) {
+                this.writeToFile(doc);
+            } else {
+                PersonsDOMBuilder.LOGGER.info(Constants.PHRASE_NOT_FOUND_RECORD);
+            }
         } catch (final SAXException e) {
             PersonsDOMBuilder.LOGGER.error(Constants.SAX_EXCEPTION, e);
         } catch (final IOException e) {
@@ -227,7 +238,7 @@ public class PersonsDOMBuilder implements IXMLParser {
 
     @Override
     public void editRecord() {
-        final String[] values = this.getDataFromConsole(Constants.TYPE_ALL);
+        final String[] valueId = this.getDataFromConsole(Constants.TYPE_ID);
         try {
             final Document doc = this.docBuilder.parse(this.pathToXMLFile);
             final Element root = doc.getDocumentElement();
@@ -237,7 +248,8 @@ public class PersonsDOMBuilder implements IXMLParser {
                 final Element personElement = (Element) personsList.item(i);
                 final String foundId = personElement
                         .getAttribute(PersonsElements.ID.getNameElement());
-                if (foundId.equals(values[Constants.ID_POSITION])) {
+                if (foundId.equals(valueId[Constants.ID_POSITION])) {
+                    final String[] values = this.getDataFromConsole(Constants.TYPE_ALL_WITHOUT_ID);
                     Node node = PersonsDOMBuilder.getNodeElement(personElement,
                             PersonsElements.FULL_NAME.getNameElement());
                     node.setTextContent(values[Constants.FULL_NAME_POSITION]);
@@ -253,6 +265,10 @@ public class PersonsDOMBuilder implements IXMLParser {
                 }
             }
             PersonsDOMBuilder.LOGGER.info(Constants.PHRASE_NOT_FOUND_RECORD);
+
+        } catch (final NumberFormatException e) {
+            PersonsDOMBuilder.LOGGER.info(Constants.ERROR_TELEPHONE);
+            PersonsDOMBuilder.LOGGER.error(Constants.NUMBER_FORMAT_EXCEPTION, e);
         } catch (final SAXParseException e) {
             PersonsDOMBuilder.LOGGER.error(Constants.SAX_PARSE_EXCEPTION, e);
         } catch (final SAXException e) {
@@ -347,8 +363,8 @@ public class PersonsDOMBuilder implements IXMLParser {
             PersonsDOMBuilder.LOGGER.info(Constants.PHRASE_ERROR_DTD);
             PersonsDOMBuilder.LOGGER.error(Constants.SAX_EXCEPTION, e);
         } catch (final FileNotFoundException e) {
-            PersonsDOMBuilder.LOGGER.error(Constants.FILE_NOT_FOUND_EXCEPTION, e);
             PersonsDOMBuilder.LOGGER.info(Constants.PHRASE_NOT_FOUND_FILE);
+            PersonsDOMBuilder.LOGGER.error(Constants.FILE_NOT_FOUND_EXCEPTION, e);
         } catch (final IOException e) {
             PersonsDOMBuilder.LOGGER.error(Constants.IO_EXCEPTION, e);
         }
@@ -375,7 +391,10 @@ public class PersonsDOMBuilder implements IXMLParser {
                 values[Constants.PATH_POSITION] = this.in.nextLine();
                 break;
             case Constants.TYPE_ALL:
-                values = this.getPersonValuesFromConsole();
+                values = this.getPersonValuesFromConsole(true);
+                break;
+            case Constants.TYPE_ALL_WITHOUT_ID:
+                values = this.getPersonValuesFromConsole(false);
                 break;
             case Constants.TYPE_SEARCH_INFO:
                 values = new String[Constants.ONE];
@@ -393,16 +412,21 @@ public class PersonsDOMBuilder implements IXMLParser {
      *
      * @return array of all values for adding new record.
      */
-    private String[] getPersonValuesFromConsole() {
+    private String[] getPersonValuesFromConsole(final boolean needID) {
         final String[] values = new String[Constants.QUANTITY_PERSON_FIELDS];
-        PersonsDOMBuilder.LOGGER.info(Constants.PHRASE_ID);
-        values[Constants.ID_POSITION] = this.in.nextLine();
+        if (needID) {
+            PersonsDOMBuilder.LOGGER.info(Constants.PHRASE_ID);
+            values[Constants.ID_POSITION] = this.in.nextLine();
+        }
         PersonsDOMBuilder.LOGGER.info(Constants.PHRASE_FULL_NAME);
         values[Constants.FULL_NAME_POSITION] = this.in.nextLine();
         PersonsDOMBuilder.LOGGER.info(Constants.PHRASE_ADDRESS);
         values[Constants.ADDRESS_POSITION] = this.in.nextLine();
         PersonsDOMBuilder.LOGGER.info(Constants.PHRASE_TELEPHONE);
         values[Constants.TELEPHONE_POSITION] = this.in.nextLine();
+        if (!values[Constants.TELEPHONE_POSITION].matches(Constants.TELEPHONE_REGEX)) {
+            throw new NumberFormatException();
+        }
         return values;
     }
 

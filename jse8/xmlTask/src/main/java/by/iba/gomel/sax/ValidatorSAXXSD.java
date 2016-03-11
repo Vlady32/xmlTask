@@ -39,7 +39,8 @@ public class ValidatorSAXXSD {
      *            xsd schema for checking.
      * @return result of validating.
      */
-    public static boolean validate(final Source xmlFile, final Source xsdSchema) {
+    public static boolean validate(final Source xmlFile, final Source xsdSchema)
+            throws SAXException {
         final SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         Schema schema;
         try {
@@ -47,16 +48,13 @@ public class ValidatorSAXXSD {
             final Validator validator = schema.newValidator();
             final Source source = xmlFile;
             validator.validate(source);
-        } catch (final SAXException e) {
-            ValidatorSAXXSD.LOGGER.info(Constants.SAX_EXCEPTION, e);
-            ValidatorSAXXSD.LOGGER.info(Constants.ERROR_XSD);
-            return false;
         } catch (final FileNotFoundException e) {
             ValidatorSAXXSD.LOGGER.error(Constants.FILE_NOT_FOUND_EXCEPTION, e);
             ValidatorSAXXSD.LOGGER.info(Constants.PHRASE_NOT_FOUND_FILE);
             return false;
         } catch (final IOException e) {
             ValidatorSAXXSD.LOGGER.info(Constants.IO_EXCEPTION, e);
+            return false;
         }
         return true;
     }
@@ -69,7 +67,8 @@ public class ValidatorSAXXSD {
      *            path to xsd file.
      * @return result of validating.
      */
-    public static boolean validate(final String pathToXMLFile, final String pathToXSDSchema) {
+    public static boolean validate(final String pathToXMLFile, final String pathToXSDSchema)
+            throws SAXException {
         final SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         final File schemaLocation = new File(pathToXSDSchema);
         Schema schema;
@@ -78,10 +77,6 @@ public class ValidatorSAXXSD {
             final Validator validator = schema.newValidator();
             final Source source = new StreamSource(pathToXMLFile);
             validator.validate(source);
-        } catch (final SAXException e) {
-            ValidatorSAXXSD.LOGGER.info(Constants.SAX_EXCEPTION, e);
-            ValidatorSAXXSD.LOGGER.info(Constants.ERROR_XSD);
-            return false;
         } catch (final FileNotFoundException e) {
             ValidatorSAXXSD.LOGGER.error(Constants.FILE_NOT_FOUND_EXCEPTION, e);
             ValidatorSAXXSD.LOGGER.error(Constants.PHRASE_NOT_INCLUDE);

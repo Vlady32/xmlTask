@@ -1,5 +1,9 @@
 package by.iba.gomel.sax.filters;
 
+import java.util.Scanner;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
@@ -13,33 +17,23 @@ import by.iba.gomel.enums.SparesElements;
  */
 public class UpdateFilter extends XMLFilterImpl {
 
-    private SparesElements currentElement;
-    private final String   key;
-    private final String   markAuto;
-    private final String   modelAuto;
-    private final int      cost;
-    private boolean        isSpare;
+    private static final Logger LOGGER        = LoggerFactory.getLogger(UpdateFilter.class);
+    private SparesElements      currentElement;
+    private final String        key;
+    private String              markAuto;
+    private String              modelAuto;
+    private int                 cost;
+    private boolean             isSpare;
+    private final Scanner       in;
+    private boolean             isFoundRecord = false;
 
-    /**
-     *
-     * @param reader
-     *            xml reader.
-     * @param key
-     *            key for updating.
-     * @param mark
-     *            auto mark auto for updating.
-     * @param model
-     *            auto model auto for updating.
-     * @param cost
-     *            cost for updating.
-     */
-    public UpdateFilter(final XMLReader reader, final String key, final String markAuto,
-            final String modelAuto, final int cost) {
+    public UpdateFilter(final XMLReader reader, final String key, final Scanner in) {
         super(reader);
         this.key = key;
-        this.markAuto = markAuto;
-        this.modelAuto = modelAuto;
-        this.cost = cost;
+        this.markAuto = new String();
+        this.modelAuto = new String();
+        this.cost = 0;
+        this.in = in;
     }
 
     @Override
@@ -73,7 +67,14 @@ public class UpdateFilter extends XMLFilterImpl {
             this.isSpare = false;
         }
         this.currentElement = null;
+        if (localName.equals(Constants.ELEMENT_SPARES) && !this.isFoundRecord) {
+            UpdateFilter.LOGGER.info(Constants.PHRASE_NOT_FOUND_RECORD);
+        }
         super.endElement(uri, localName, qName);
+    }
+
+    public boolean isFoundRecord() {
+        return this.isFoundRecord;
     }
 
     @Override
@@ -82,11 +83,33 @@ public class UpdateFilter extends XMLFilterImpl {
         if (qName.equals(Constants.ELEMENT_SPARE)
                 && (atts.getValue(Constants.ATTRIBUTE_KEY).equals(this.key))) {
             this.isSpare = true;
+            this.isFoundRecord = true;
+            final String[] values = this.getSpareValuesFromConsole();
+            this.markAuto = values[Constants.MARK_AUTO_POSITION];
+            this.modelAuto = values[Constants.MODEL_AUTO_POSITION];
+            this.cost = Integer.parseInt(values[Constants.COST_POSITION]);
         }
+
         if (this.isSpare && !qName.equals(Constants.ELEMENT_SPARE)) {
             this.currentElement = SparesElements.valueOf(localName.toUpperCase());
         }
         super.startElement(uri, localName, qName, atts);
+    }
+
+    /**
+     *
+     * @return array of all values for adding new record.
+     */
+    private String[] getSpareValuesFromConsole() {
+        final String[] values = new String[Constants.QUANTITY_SPARE_FIELDS];
+        values[Constants.KEY_POSITION] = this.key;
+        UpdateFilter.LOGGER.info(Constants.PHRASE_MARK_AUTO);
+        values[Constants.MARK_AUTO_POSITION] = this.in.nextLine();
+        UpdateFilter.LOGGER.info(Constants.PHRASE_MODEL_AUTO);
+        values[Constants.MODEL_AUTO_POSITION] = this.in.nextLine();
+        UpdateFilter.LOGGER.info(Constants.PHRASE_COST);
+        values[Constants.COST_POSITION] = this.in.nextLine();
+        return values;
     }
 
 }
